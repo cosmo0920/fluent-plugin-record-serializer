@@ -21,7 +21,7 @@ class RecordSerializerOutputTest < Test::Unit::TestCase
   ]
 
   def create_driver(conf=CONFIG)
-    Fluent::Test::OutputTestDriver.new(Fluent::RecordSerializerOutput).configure(conf)
+    Fluent::Test::Driver::Output.new(Fluent::Plugin::RecordSerializerOutput).configure(conf)
   end
 
   def test_configure
@@ -34,21 +34,21 @@ class RecordSerializerOutputTest < Test::Unit::TestCase
     record = {'spam' => 1, 'ham' => 'egg',}
     d = create_driver
 
-    d.run do
-      d.emit(record)
+    d.run(default_tag: 'test') do
+      d.feed(record)
     end
 
-    assert_equal [{'tag' => TAG, FIELD_NAME => record.to_json}], d.records
+    assert_equal [{'tag' => TAG, FIELD_NAME => record.to_json}], d.events.map{|e| e.last}
   end
 
   def test_yaml
     record = {'spam' => 1, 'ham' => 'egg',}
     d = create_driver YAML_CONFIG
 
-    d.run do
-      d.emit(record)
+    d.run(default_tag: 'test') do
+      d.feed(record)
     end
 
-    assert_equal [{'tag' => TAG, FIELD_NAME => record.to_yaml}], d.records
+    assert_equal [{'tag' => TAG, FIELD_NAME => record.to_yaml}], d.events.map{|e| e.last}
   end
 end

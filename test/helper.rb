@@ -15,8 +15,8 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 require 'fileutils'
 require 'fluent/log'
 require 'fluent/test'
-
-$log = Fluent::Log.new(STDOUT, Fluent::Log::LEVEL_DEBUG)
+require 'fluent/test/driver/output'
+require 'fluent/test/driver/filter'
 
 unless defined?(Test::Unit::AssertionFailedError)
   class Test::Unit::AssertionFailedError < StandardError

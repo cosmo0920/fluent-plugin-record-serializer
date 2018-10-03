@@ -23,7 +23,7 @@ class RecordSerializerFilterTest < Test::Unit::TestCase
   ]
 
   def create_driver(conf=CONFIG)
-    Fluent::Test::FilterTestDriver.new(Fluent::RecordSerializerFilter, TAG).configure(conf)
+    Fluent::Test::Driver::Filter.new(Fluent::Plugin::RecordSerializerFilter).configure(conf)
   end
 
   def test_configure
@@ -36,21 +36,21 @@ class RecordSerializerFilterTest < Test::Unit::TestCase
     record = {'spam' => 1, 'ham' => 'egg',}
     d = create_driver
 
-    d.run do
-      d.emit(record)
+    d.run(default_tag: TAG) do
+      d.feed(record)
     end
 
-    assert_equal [{'tag' => TAG, FIELD_NAME => record.to_json}], d.filtered_as_array.map { |e| e.last }
+    assert_equal [{'tag' => TAG, FIELD_NAME => record.to_json}], d.filtered.map { |e| e.last }
   end
 
   def test_yaml
     record = {'spam' => 1, 'ham' => 'egg',}
     d = create_driver YAML_CONFIG
 
-    d.run do
-      d.emit(record)
+    d.run(default_tag: TAG) do
+      d.feed(record)
     end
 
-    assert_equal [{'tag' => TAG, FIELD_NAME => record.to_yaml}], d.filtered_as_array.map { |e| e.last }
+    assert_equal [{'tag' => TAG, FIELD_NAME => record.to_yaml}], d.filtered.map { |e| e.last }
   end
 end

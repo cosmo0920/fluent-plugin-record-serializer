@@ -1,26 +1,24 @@
+require 'fluent/plugin/output'
 require 'fluent/plugin/record_serializer'
 
-module Fluent
+module Fluent::Plugin
   class RecordSerializerOutput < Output
     Fluent::Plugin.register_output('record_serializer', self)
 
-    unless method_defined?(:router)
-      define_method("router") { Fluent::Engine }
-    end 
+    helpers :event_emitter
 
     config_param :tag, :string
     config_param :format, :string, :default => 'json'
     config_param :field_name, :string, :default => 'payload'
 
-    include SetTagKeyMixin
     include Fluent::RecordSerializer
 
-    def emit(tag, es, chain)
+    def process(tag, es)
       es.each { |time, record|
         begin
           serialized_record = serialize_record(@format, record)
         rescue => e
-          $log.warn "serialize error: #{e.message}"
+          log.warn "serialize error: #{e.message}"
           next
         end
 
@@ -29,8 +27,6 @@ module Fluent
           @field_name => serialized_record
         })
       }
-
-      chain.next
     end
   end
 end
